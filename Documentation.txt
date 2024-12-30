@@ -1,0 +1,313 @@
+1) DATABASE CREATION CODE
+
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+ 
+SQLALCHEMY_DATABASE_URL = 'sqlite:///./blog_api.db'
+ 
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+ 
+SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+ 
+Base = declarative_base()
+ 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+2)Under database folder: create models.py
+
+from .database import Base
+from sqlalchemy import Column, Integer, String, DateTime
+
+class DbPost(Base):
+    __tablename__ = "post"
+    id = Column(Integer, primary_key=True, index=True)
+    image_url = Column(String)
+    title = Column(String)
+    content = Column(String)
+    creator = Column(String)
+    timestamp = Column(String) 
+
+NOTE: 
+Base, SQLAlchemy'de ORM (Object Relational Mapper) tabanlı modelleri tanımlamak için kullanılan bir temel sınıftır.
+Buradaki--> "Base" sinifi:
+Tablo Tanımlama: Tüm veritabanı tablolarını ve modellerini tanımlamak için bir temel (üst) sınıf sağlar.
+Veritabanı ile İlişkilendirme: Model sınıflarının veritabanındaki tablolara eşlenmesini sağlar.
+Örneğin, DbPost sınıfı, Base sınıfından türetilerek bir tablo olarak tanımlanır. Base olmadan SQLAlchemy hangi 
+sınıfın tablo olarak kullanılacağını bilemez.
+
+NOTE: Yukarıdaki Python kodu, SQLAlchemy kullanılarak bir veritabanı modeli tanımlar. SQLAlchemy, Python'da 
+veritabanı işlemlerini kolaylaştıran popüler bir ORM (Object-Relational Mapping) aracıdır. Bu modelde, bir DbPost 
+sınıfı tanımlanmış ve post adında bir veritabanı tablosu için bir yapı oluşturulmuştur.
+
+Kodun detaylı açıklaması:
+
+Kod Açıklaması:
+from .database import Base:
+
+Burada, Base nesnesi database.py dosyasından import ediliyor. Bu Base, SQLAlchemy'nin tüm modelleri için bir 
+temel sınıf sağlar. Base sınıfı, modellerin SQLAlchemy ORM'in özelliklerini miras almasını sağlar.
+from sqlalchemy import Column, Integer, String, DateTime:
+
+SQLAlchemy'de veritabanı tabloları ve sütunları tanımlamak için gerekli olan temel sınıflar import ediliyor. 
+Column, veritabanı sütunlarını tanımlamak için; Integer, String, ve DateTime ise bu sütunların veri tiplerini belirtmek için kullanılır.
+class DbPost(Base)::
+
+DbPost, Base sınıfını miras alarak bir SQLAlchemy modeli oluşturuyor. Bu model, veritabanında bir tabloyu temsil 
+eder. Burada, DbPost sınıfı post tablosunu temsil etmek için kullanılıyor.
+__tablename__ = "post":
+
+Bu satır, SQLAlchemy'ye bu modelin hangi veritabanı tablosuna karşılık geldiğini belirtir. 
+Burada tablonun adı "post" olarak belirlenmiş. Yani, veritabanında bir post adında tablo oluşturulacak.
+Sütun Tanımlamaları (Columns):
+
+id = Column(Integer, primary_key=True, index=True): Bu sütun, her bir post için benzersiz bir kimlik sağlar. 
+primary_key=True, bu sütunun birincil anahtar (primary key) olduğunu belirtir. index=True ise bu sütunun 
+indekslendiği anlamına gelir, böylece sorgulama performansı artar.
+
+image_url = Column(String): Posta ait bir görsel URL'sini saklayacak olan sütun. Veri tipi olarak String kullanılmış.
+
+title = Column(String): Post başlığını saklayan sütun. Veri tipi olarak String kullanılmış.
+
+content = Column(String): Post içeriğini saklayan sütun. Veri tipi olarak String kullanılmış.
+
+creator = Column(String): Postu oluşturan kişiyi (yazar) saklayan sütun. Veri tipi olarak String kullanılmış.
+
+timestamp = Column(String): Postun oluşturulma tarihini veya zaman bilgisini saklayan sütun. Bu sütunun veri tipi 
+String olarak belirlenmiş, ancak daha doğru bir veri tipi için DateTime kullanmak daha uygun olabilir.
+
+İyileştirme ve Notlar:
+timestamp Alanı: Eğer tarih ve zaman verilerini saklıyorsanız, timestamp için String yerine DateTime kullanmak 
+daha uygun olacaktır. Örneğin:
+
+python
+Copy code
+timestamp = Column(DateTime)
+Bu durumda, veritabanına tarih ve saat verisi doğru formatta kaydedilir ve sorgulamalar yaparken zamanla ilgili 
+işlemler (örneğin, tarih karşılaştırmaları) daha kolay olur.
+
+Veritabanı İlişkileri: Eğer DbPost modelinde başka bir modelle ilişki kurmak isterseniz, örneğin her postun 
+bir yazarla ilişkisi varsa, ForeignKey gibi ilişki tanımları ekleyebilirsiniz.
+
+Genel Bakış:
+Bu model, bir blog yazısı veya bir gönderi (post) için temel bir yapı sağlar. DbPost modeli, aşağıdaki gibi bir 
+tablonun SQLAlchemy ORM ile temsil edilmesini sağlar:
+
+id	image_url	title	content	creator	timestamp
+1	/img1.jpg	Post 1	Content	Author1	2024-12-30 12:00:00
+2	/img2.jpg	Post 2	Content	Author2	2024-12-30 13:00:00
+Bu tür modellerle, veritabanındaki veriler üzerinde sorgular yapabilir, yeni veriler ekleyebilir, güncelleyebilir 
+ve silebilirsiniz.
+
+3)Under FASTAPI-BLOG--> create a folder name "router"
+    -Under "router" folder create a file name "schemas.py"
+NOTE: Router ve Schemas genellikle web uygulamaları geliştirirken kullanılır, özellikle API'ler için.
+
+Router:
+Amaç: Web uygulamasında gelen HTTP isteklerini (GET, POST, PUT, DELETE vb.) yönlendiren ve işleyen yapıdır.
+Nasıl çalışır?: URL'ler ve HTTP yöntemlerine göre uygun işlevi çağırır. Örneğin, bir /posts endpoint'ine gelen 
+GET isteğini, tüm postları dönen bir fonksiyonla ilişkilendirir.
+Örnek: FastAPI veya Flask gibi frameworklerde router, belirli bir endpoint için işlem yapan fonksiyonları tanımlar.
+
+Schemas:
+Amaç: Veri doğrulama ve veri modelleme için kullanılır.
+Nasıl çalışır?: API'ye gelen verileri kontrol eder (örneğin, JSON formatındaki veri). Doğru tipte ve doğru formatta 
+olup olmadığını denetler.
+Örnek: Pydantic gibi kütüphaneler, veri doğrulama için schema'lar tanımlamayı sağlar. Örneğin, bir post modelinin 
+schema'sı, başlık ve içeriğin zorunlu olduğunu belirtebilir.
+Kısacası, Router HTTP isteklerini yönlendirirken, Schemas verilerin doğru formatta olmasını sağlar.
+
+schemas.py
+from pydantic import BaseModel
+from datetime import datetime
+
+class PostBase(BaseModel):
+    #These are what we get from the API
+    image_url: str
+    title: str
+    content: str
+    creator: str
+
+    #What do we give back to the caller? We have a class post display base model
+class PostDisplay(BaseModel):
+        id: int 
+        image_url: str
+        title: str
+        content: str
+        creator: str
+        timestamp: datetime
+        class Config():
+            orm_mode = True
+             
+NOTE: Bu kodda Pydantic kullanılarak veri modelleri (schemas) tanımlanmıştır. Kodun özellikle dikkat çeken kısmı orm_mode = True ifadesidir.
+
+PostBase ve PostDisplay Sınıfları:
+PostBase:
+API'den gelen verileri doğrulamak için kullanılır.
+Örneğin, bir kullanıcı yeni bir post oluşturmak istediğinde image_url, title, content ve creator alanlarını sağlamalıdır.
+Bu sınıf, API'ye gönderilen veri yapısını tanımlar.
+
+PostDisplay:
+API'nin çağrı yapan kişiye döndüğü verileri tanımlar.
+Örneğin, veritabanından alınan bir post bilgisi kullanıcıya döndürülürken, id ve timestamp gibi ek bilgiler de içerir.
+
+orm_mode = True:
+Bu ifade PostDisplay sınıfının Config alt sınıfında tanımlanmıştır ve aşağıdaki işleve sahiptir:
+
+Amaç: SQLAlchemy gibi bir ORM'den gelen verileri kolayca Pydantic modeline dönüştürmek.
+Nasıl Çalışır?:
+ORM'den dönen veriler genellikle Python nesneleri olarak gelir (örneğin, bir SQLAlchemy modeli).
+Normalde Pydantic yalnızca dictionary (sözlük) formatındaki verilerle çalışır. Ancak orm_mode = True ayarlandığında, Pydantic bu Python nesnelerini de destekler.
+Örnek:
+Eğer bir SQLAlchemy modeli DbPost şu şekilde dönerse:
+
+post = DbPost(id=1, image_url="img.jpg", title="Test", content="Content", creator="User", timestamp="2024-12-30")
+
+PostDisplay modeline şu şekilde aktarabilirsiniz:
+display_post = PostDisplay.from_orm(post)
+Bu işlem, orm_mode = True olmadan mümkün olmaz.
+
+Özet:
+orm_mode = True, ORM nesnelerini Pydantic modellerine dönüştürmeyi kolaylaştırır.
+Bu özellik olmadan, verilerin manuel olarak dictionary formatına çevrilmesi gerekirdi.
+
+4)Connect with TablePlus
+    -open TablePlus
+    -click + and create a new connect using sqlite
+    -copy "blog_api.db" path and past it to TablePlus
+    -give a name to the connection "blog_api"
+    -click connect
+    -see the Columns 
+
+5)Create a folder name db_post.py under database folder
+from routers.schemas import PostBase
+from sqlalchemy.orm.session import Session
+import datetime
+from database.models import DbPost
+
+def create(db: Session, request: PostBase):
+    new_post = DbPost(
+        image_url = request.image_url,
+        title = request.title,
+        content = request.content,
+        creator = request.creator,
+        timestamp = datetime.datetime.now()
+    )
+
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
+    return new_post
+
+NOTE: Bu Python kodu, bir veritabanında yeni bir post (gönderi) oluşturmak için kullanılan bir işlevi tanımlıyor. 
+İşte detaylı bir açıklama:
+
+Kodun Amacı
+"create" fonksiyonu, bir gönderi (post) oluşturup bunu veritabanına eklemek için kullanılıyor.
+Kodda Kullanılan Bileşenler
+
+db: Session
+    Veritabanı oturumu (SQLAlchemy'nin bir oturumu). Veritabanıyla etkileşimde bulunmak için kullanılır.
+
+request: PostBase
+    PostBase, muhtemelen bir gönderinin sahip olması gereken alanları (örneğin, title, content, image_url, vb.) tanımlayan bir şema 
+    veya modeldir.
+
+DbPost
+    Veritabanında Post tablosuna karşılık gelen bir modeldir. Bu model üzerinden yeni bir kayıt (row) oluşturuluyor.
+
+datetime.datetime.now()
+Gönderinin oluşturulduğu anı kaydetmek için kullanılıyor.
+
+Fonksiyonun İşleyişi
+a)Yeni bir gönderi (post) nesnesi oluşturuluyor:
+    new_post = DbPost(...) satırı, DbPost modeli üzerinden yeni bir gönderi nesnesi oluşturuyor. Bu nesneye request üzerinden gelen
+    veriler atanıyor:
+
+    image_url: Görselin URL'si.
+    title: Gönderinin başlığı.
+    content: Gönderinin içeriği.
+    creator: Gönderiyi oluşturan kişi (veya kullanıcı).
+    timestamp: Gönderinin oluşturulma zamanı (şu anki zaman olarak ayarlanıyor).
+
+b)Gönderi veritabanına ekleniyor:
+    db.add(new_post): Yeni oluşturulan gönderi nesnesi veritabanına eklenmek üzere işaretleniyor.
+    db.commit(): Veritabanı işlemi tamamlanarak gönderi kalıcı olarak ekleniyor.
+
+3)Yeni oluşturulan gönderi yenileniyor:
+    db.refresh(new_post): Gönderi nesnesini yenileyerek veritabanındaki son duruma güncelliyor. (Örneğin, id gibi otomatik oluşturulan 
+    alanlar bu aşamada alınır.)
+4)Gönderi geri döndürülüyor:
+return new_post: Yeni oluşturulan gönderi nesnesi, fonksiyonun sonucu olarak döndürülüyor.
+Özet
+Bu kod:
+Bir PostBase şemasından gelen verilerle, veritabanındaki DbPost modeline uygun bir nesne oluşturur.
+Bu nesneyi veritabanına ekler ve işlem sonucunu döndürür.
+Bu, bir blog gönderisi veya içerik yönetim sistemi gibi bir uygulamada yeni gönderiler oluşturmak için kullanılabilecek temel bir işlevdir.
+
+6)Simdi "routers" klasoru altinda bir "post.py" dosyasi olusturalim ve post adinda bir end point olusturalim.
+
+from fastapi import APIRouter, Depends
+from routers.schemas import PostBase, PostDisplay
+from sqlalchemy.orm import Session
+from database.database import get_db
+from database import db_post
+
+router = APIRouter(
+    prefix='/post',
+    tags=['post']
+)
+
+@router.post('')
+def create(request: PostBase, db: Session =Depends(get_db)):
+    return db_post.create(db, request)
+
+Bu kod, FastAPI kullanarak bir "Post" (Gönderi) API'si oluşturmak için tanımlanmış bir router'dır. İşte kısa bir açıklama:
+
+Kodun İşlevi
+Amaç: Yeni bir gönderi (post) oluşturmak ve bunu veritabanına kaydetmek.
+Yapı: FastAPI'nin APIRouter yapısı kullanılarak, /post URL'si altında bir endpoint oluşturulmuş.
+
+Kodun Detaylı Parçaları
+a)APIRouter Tanımlaması
+
+router = APIRouter(
+    prefix='/post',
+    tags=['post']
+)
+Bu router, tüm endpoint'leri /post URL'siyle başlayan yollar altında toplar.
+Swagger UI'da bu yollar tags=['post'] ile gruplanır.
+
+b)POST Endpoint'i
+
+@router.post('')
+def create(request: PostBase, db: Session = Depends(get_db)):
+    return db_post.create(db, request)
+Bu endpoint, bir POST isteği alır:
+request: PostBase: Gelen istek, bir PostBase şeması ile doğrulanır (örneğin: başlık, içerik gibi alanları içerir).
+db: Session = Depends(get_db): Veritabanı bağlantısı (SQLAlchemy oturumu) elde edilir.
+Endpoint, veritabanındaki db_post.create fonksiyonunu çağırır ve gelen veriyi kaydeder.
+
+c)Veritabanı İşlemi
+
+db_post.create(db, request), daha önce paylaştığınız create fonksiyonuna yönlendirme yapar. Bu, veritabanına yeni bir 
+kayıt ekler ve döner.
+
+Sonuç
+Bu kod:
+
+/post URL'sine bir POST isteğiyle yeni bir gönderi oluşturmanıza olanak tanır.
+Veritabanıyla bağlantıyı sağlar ve şemayı doğrular.
+Router'ı kullanarak daha düzenli bir proje yapısı sunar.
+
+7)Simdi bir get metodu olusturalim ve bilgileri alalim.
+    -go to db_post.py 
+    -add below code
+    def get_all(db: Session):
+    return db.query(DbPost).all()
+    -simdi routers altindaki post.py'e gidelim ve "get"den bir end point olusturalim.
