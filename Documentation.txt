@@ -311,3 +311,62 @@ Router'ı kullanarak daha düzenli bir proje yapısı sunar.
     def get_all(db: Session):
     return db.query(DbPost).all()
     -simdi routers altindaki post.py'e gidelim ve "get"den bir end point olusturalim.
+    @router.get('/all')
+    def posts(db: Session = Depends(get_db)):
+    return db_post.get_all(db)
+
+8)Simdi bir delete metodu olusturalim
+    -go to db_post.py 
+    -add below code
+    def delete(id: int, db: Session):
+    post = db.query(DbPost).filter(DbPost.id == id).first()
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Post with id {id} not found')
+    db.delete(post)
+    db.commit()
+    return 'ok'
+    -simdi routers altindaki post.py'e gidelim ve "delete"den bir end point olusturalim.
+    @router.delete('/{id}')
+    def delete(id: int, db: Session = Depends(get_db)):
+    return db_post.delete(id, db)
+
+9)Now images will be uploaded
+kucuk bir ayrinti ayni dosyanin yuklenmesini istemiyoruz bunu da ayarlayacagiz
+    -go to db_post.py 
+    -add below code
+    @router.post('/image')
+    def upload_image(image: UploadFile = File(...)):
+        letter = string.ascii_letters
+        rand_str = ''.join(random.choice(letter) for i in range(6))
+        new = f'_{rand_str}.'
+        filename = new.join(image.filename.rsplit('.', 1))
+        path = f'images/{filename}'
+
+        with open(path, "w+b") as buffer:
+        shutil.copyfileobj(image.file, buffer)
+
+    return {'filename': path}
+
+    -go to main.py
+    -add below code 
+    from fastapi.staticfiles import StaticFiles
+
+    app.mount('/images', StaticFiles(directory='images'), name= 'images')
+
+10) Simdi yuklemeleri otomatiklestirelim.
+    -go to main.py 
+    -add below code
+    from fastapi.middleware.cors import CORSMiddleware
+    app.mount('/images', StaticFiles(directory='images'), name= 'images')
+
+origins = [
+    'http://localhost:3000'
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins  = origins,
+    allow_credentials = True,
+    allow_methods = ['*'],
+    allow_headers = ['*']
+)
