@@ -1,3 +1,85 @@
+FASTAPI
+
+-Create a folder
+-Drug that folder and drop it to VS code
+-Open new terminal
+-Create virtual environment -> "python3 -m venv env"  --> Burada "env" herhangi bir sey olabilir
+-Activate vertial environment -> env\Scripts\Activate -> Soyle bir sey gormeli -> (env) C:\fastapi-exercise\fastapi-blog 
+-Create a file name: requirements.txt
+-Added;
+    -fastapi
+    -uvicorn
+    -sqlalchemy
+    -pydantic
+    -python-multipart
+    -aiofiles
+-save
+-pip install -r requirements.txt --> In this way, we have set up the libraries in the requirements.txt file.
+
+1. FastAPI nedir?
+Python ile hızlı ve modern web API’leri oluşturmak için kullanılan bir web çerçevesidir.
+Ne İşe Yarar?
+-RESTful API’ler geliştirmek için kullanılır.
+-Otomatik dokümantasyon oluşturur (Swagger UI ve ReDoc).
+-Performanslıdır, çünkü Starlette ve Pydantic üzerine kuruludur.
+2. Uvicorn nedir? --> Python için bir ASGI (Asynchronous Server Gateway Interface) sunucusudur.
+Ne İşe Yarar?
+-FastAPI gibi asenkron çerçevelerin çalıştırılmasını sağlar.
+-Sunucu, gelen istekleri FastAPI uygulamasına iletir.
+-Performanslı ve hızlı bir şekilde API’leri çalıştırmak için gereklidir.
+3. sqlalchemy nedir?
+Python için popüler bir ORM (Object Relational Mapper) kütüphanesidir.
+Ne İşe Yarar?
+Veritabanlarıyla Python nesneleri arasında köprü kurar.
+SQL sorguları yazmadan, Python kodlarıyla veritabanı işlemleri yapmanı sağlar.
+İlişkisel veritabanlarını yönetmek ve sorgulamak için kullanılır.
+4. Pydantic nedir?
+Veri doğrulama ve ayar yönetimi için kullanılan bir Python kütüphanesidir.
+Ne İşe Yarar?
+Gelen/verilen verilerin doğru formatta olup olmadığını kontrol eder.
+FastAPI ile birlikte çalışarak JSON verilerini doğrular ve işlemler için kullanır.
+Tip güvenliğine önem verir ve veri modelleme için kullanılır.
+5. python-multipart nedir?
+Multipart/form-data formatındaki dosyaları ve formları işlemek için bir kütüphanedir.
+Ne İşe Yarar?
+FastAPI ile dosya yükleme (file upload) işlemleri yapılırken gereklidir.
+Örneğin, bir kullanıcı bir resim veya belge yüklediğinde, bu kütüphane sayesinde form verilerini işleyebilirsiniz.
+6. aiofiles nedir?
+Python’da asenkron dosya okuma ve yazma işlemleri yapmak için kullanılan bir kütüphanedir.
+Ne İşe Yarar?
+Büyük dosyaları daha performanslı bir şekilde işlemek için kullanılır.
+Örneğin, bir dosya yüklerken veya indirirken sunucunun "beklemesini" engeller, bu da performansı artırır.
+Özet:
+FastAPI: Modern ve hızlı web API’leri oluşturur.
+Uvicorn: FastAPI gibi çerçeveleri çalıştıran bir sunucudur.
+SQLAlchemy: Veritabanı işlemlerini kolaylaştırır.
+Pydantic: Veri doğrulama ve modelleme yapar.
+python-multipart: Dosya yükleme işlemleri için gereklidir.
+aiofiles: Dosya okuma/yazma işlemlerini asenkron hale getirir.
+
+-write -> deactivate
+-write -> env\Scripts\activate
+-create -> main.py
+    write below code inside the main .py
+
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def hw():
+    return "Hello World"
+
+-Save
+-Go to terminal -> write -> uvicorn main:app --reload
+    Swagger dokumantasyonu olusturuldu
+    Ctrl + click --> http://127.0.0.1:8000
+    Than write and click http://127.0.0.1:8000/docs#
+
+-goto FASTAPI-BLOG
+-Create a folder: database
+-Inside database folder --> Create a file: database.py
+
 1) DATABASE CREATION CODE
 
 from sqlalchemy import create_engine
