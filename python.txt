@@ -1,0 +1,73 @@
+1. List (Liste)
+Sıralıdır (Ordered)
+Değiştirilebilir (Mutable)
+Tekrar eden elemanlara izin verir (Duplicates Allowed)
+Köşeli parantez [] ile tanımlanır
+📌 Kullanım: Dinamik bir veri koleksiyonu saklamak için kullanılır.
+Örnek:
+my_list = [1, 2, 3, 4, 2]  # Aynı eleman birden fazla kez olabilir
+my_list.append(5)  # Yeni eleman eklenebilir
+my_list[0] = 10  # Eleman değiştirilebilir
+print(my_list)  # Çıktı: [10, 2, 3, 4, 2, 5]
+
+2. Tuple (Demet)
+Sıralıdır (Ordered)
+Değiştirilemez (Immutable)
+Tekrar eden elemanlara izin verir (Duplicates Allowed)
+Parantez () ile tanımlanır
+📌 Kullanım: Verilerin değiştirilemeyeceği durumlarda kullanılır.
+Örnek:
+my_tuple = (1, 2, 3, 4, 2)
+# my_tuple[0] = 10  # Hata! Tuple değiştirilemez
+print(my_tuple)  # Çıktı: (1, 2, 3, 4, 2)
+
+3. Set (Küme)
+Sırasızdır (Unordered)
+Değiştirilebilir (Mutable, ancak elemanları değiştirilemez)
+Tekrar eden elemanlara izin vermez (No Duplicates)
+Küme parantezi {} ile tanımlanır
+📌 Kullanım: Benzersiz (unique) elemanlar tutmak için kullanılır.
+Örnek:
+my_set = {1, 2, 3, 4, 2}
+print(my_set)  # Çıktı: {1, 2, 3, 4} (Tekrar eden '2' kaldırıldı)
+my_set.add(5)  # Yeni eleman eklenebilir
+my_set.remove(3)  # Mevcut bir eleman silinebilir
+
+4. Dict (Sözlük)
+Sıralıdır (Python 3.7+ ile Ordered)
+Değiştirilebilir (Mutable)
+Key-value (anahtar-değer) çiftleri ile çalışır
+Süslü parantez {} ile tanımlanır
+📌 Kullanım: Verileri anahtar-değer çiftleri halinde saklamak için kullanılır.
+Örnek:
+my_dict = {"name": "Alice", "age": 25, "city": "New York"}
+print(my_dict["name"])  # Çıktı: Alice
+
+my_dict["age"] = 26  # Değer değiştirilebilir
+my_dict["job"] = "Engineer"  # Yeni key-value eklenebilir
+print(my_dict)  
+# Çıktı: {'name': 'Alice', 'age': 26, 'city': 'New York', 'job': 'Engineer'}
+
+5. Optional (Opsiyonel - None Değer Alabilen)
+Bir değişkenin None değeri alabileceğini belirtir
+Genellikle typing modülüyle kullanılır
+Kodun okunabilirliğini artırır
+📌 Kullanım: Bir değişkenin bazen değer alıp bazen boş olabileceği durumlarda kullanılır.
+
+Örnek:
+from typing import Optional
+
+def get_name(user_id: int) -> Optional[str]:  # Dönüş değeri ya 'str' ya da 'None' olabilir
+    users = {1: "Alice", 2: "Bob"}
+    return users.get(user_id)  # Eğer user_id yoksa None dönecek
+
+print(get_name(1))  # Çıktı: Alice
+print(get_name(3))  # Çıktı: None
+
+Özet Tablosu:
+Veri Tipi	Sıralı mı?	Değiştirilebilir mi?	Tekrar Eden Elemanlar?	            Tanımlama Simgesi
+List	    ✅ Evet	    ✅ Evet	                        ✅ Evet	                        []
+Tuple	    ✅ Evet	    ❌ Hayır	                        ✅ Evet	                        ()
+Set	        ❌ Hayır	    ✅ Evet	                        ❌ Hayır	                        {}
+Dict	    ✅ Evet	    ✅ Evet	                        ❌ (Key'ler benzersiz olmalı)	{key: value}
+Optional	-	          -	                                -	                              Optional[type]
